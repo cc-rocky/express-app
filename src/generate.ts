@@ -1,7 +1,7 @@
 import fs from "fs";
 
 // Function to generate a file
-const generateFile = (fileName, content) => {
+const generateFile = (fileName: string, content: string) => {
   fs.writeFile(fileName, content, (err) => {
     if (err) {
       console.error("Error generating file:", err);
