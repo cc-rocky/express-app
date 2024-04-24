@@ -12,3 +12,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20"
+      - name: Generate child example file
+        run: node index.js
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact # Specify the name of the artifact
+          path: ./example.txt # Specify the path to your generated file
