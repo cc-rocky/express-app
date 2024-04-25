@@ -16,8 +16,18 @@ jobs:
         run: npm install
       - name: Generate child example file
         run: npm run generate
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: my-artifact
+          path: downloads/
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: my-artifact # Specify the name of the artifact
-          path: ./example.txt # Specify the path to your generated file
+          name: my-artifact1 # Specify the name of the artifact
+          path: ./example1.txt # Specify the path to your generated file
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact1 # Specify the name of the artifact
+          path: ./downloads # Specify the path to your generated file
