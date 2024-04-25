@@ -12,7 +12,7 @@ const generateFile = (fileName: string, content: string) => {
 };
 
 // Usage example
-const fileName = "example.txt";
+const fileName = "example1.txt";
 const fileContent = "This is the child generated content of the file.";
 
 generateFile(fileName, fileContent);
