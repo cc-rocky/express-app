@@ -48,7 +48,11 @@ jobs:
         if: always()
         with:
           status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: "failure"
           notification_title: "{emogi} Workflow *{workflow}* Faliure.Additional details:${{ steps['faliure'].outputs['failure-step'] }}"
+          message_format: null
+          footer: null       
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      
