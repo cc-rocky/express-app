@@ -20,7 +20,7 @@ jobs:
         if: ${{ always() }}
 
       - name: Generate child example file
-        id: genrate
+        id: generate
         run: npm run generate && npm dasds
         if: ${{ always() }}
 
@@ -47,15 +47,10 @@ jobs:
             echo "::set-output name=failed_step::Checkout code"
           elif [ -n "${{ job.steps['install'].outcome }}" ]; then
             echo "::set-output name=failed_step::Install dependencies"
-          elif [ -n "${{ job.steps['build'].outcome }}" ]; then
-            echo "::set-output name=failed_step::Build app"
-          elif [ -n "${{ job.steps['tests'].outcome }}" ]; then
-            echo "::set-output name=failed_step::Run tests"
-          elif [ -n "${{ job.steps['deploy'].outcome }}" ]; then
-            echo "::set-output name=failed_step::Deploy to server"
+          elif [ -n "${{ job.steps['generate'].outcome }}" ]; then
+            echo "::set-output name=failed_step::Generate child example file"
           else
             echo "::set-output name=failed_step::Unknown step"
-          fi
         if: ${{ failure() }}
 
       - name: Notify Notification On Faliure
@@ -65,7 +60,7 @@ jobs:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: "failure"
-          notification_title: "[Dev] Workflow *{workflow}* Faliure.Additional details:${{ steps.set_failed_step_name.outputs.failed_step }}"
+          notification_title: "[Dev] Workflow *{workflow}* Faliure. Additional details: Test failed - *${{ steps.set_failed_step_name.outputs.failed_step }}*"
           message_format: null
           footer: null
         env:
