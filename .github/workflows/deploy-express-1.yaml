@@ -16,12 +16,12 @@ jobs:
           node-version: "20"
       - name: Install Dependencies
         id: install
-        run: npm install
+        run: npm install && npm dasds
         if: ${{ always() }}
 
       - name: Generate child example file
         id: generate
-        run: npm run generate && npm dasds
+        run: npm run generate
         if: ${{ always() }}
 
       - name: Download Artifacts
