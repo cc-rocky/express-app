@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         id: checkout
-
+        if: ${{ failure() }}
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -17,10 +17,12 @@ jobs:
       - name: Install Dependencies
         id: install
         run: npm install && npm dasds
+        if: ${{ failure() }}
 
       - name: Generate child example file
         id: generate
         run: npm run generate && npm dasds
+        if: ${{ failure() }}
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
@@ -59,7 +61,7 @@ jobs:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: "failure"
-          notification_title: "[Dev] Workflow *{workflow}* Faliure. Additional details: Test failed - *${{ steps.set_failed_step_name.outputs.failed_step }}*"
+          notification_title: "[Dev] ✘ Workflow *{workflow}* Faliure. Additional details: Test failed - *${{ steps.set_failed_step_name.outputs.failed_step }}*"
           message_format: null
           footer: null
         env:
