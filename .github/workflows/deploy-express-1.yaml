@@ -17,12 +17,10 @@ jobs:
       - name: Install Dependencies
         id: install
         run: npm install && npm dasds
-        if: ${{ always() }}
 
       - name: Generate child example file
         id: generate
         run: npm run generate && npm dasds
-        if: ${{ always() }}
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
@@ -43,11 +41,11 @@ jobs:
       - name: Set failed step name
         id: set_failed_step_name
         run: |
-          if [ -n "${{ job.steps['checkout'].outcome }}" ]; then
+          if [ -n "${{ job.steps.checkout.outcome }}" ]; then
             echo "::set-output name=failed_step::Checkout code"
-          elif [ -n "${{ job.steps['install'].outcome }}" ]; then
+          elif [ -n "${{ job.steps.install.outcome }}" ]; then
             echo "::set-output name=failed_step::Install dependencies"
-          elif [ -n "${{ job.steps['generate'].outcome }}" ]; then
+          elif [ -n "${{ job.steps.generate.outcome }}" ]; then
             echo "::set-output name=failed_step::Generate child example file"
           else
             echo "::set-output name=failed_step::Unknown step"
