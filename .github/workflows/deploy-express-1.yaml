@@ -1,0 +1,54 @@
+name: Deploy Express Server 1
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger_workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+      - name: Install Dependencies
+        run: npm install
+
+      - name: faliure
+        if: ${{ failure() }}
+        run: echo "::set-output name=failure-step::Install Dependencies"
+
+      - name: Generate child example file
+        run: npm run generate && npm dasds
+
+      - name: faliure
+        if: ${{ failure() }}
+        run: echo "::set-output name=failure-step::Generate child example file"
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: my-artifact
+          path: downloads/
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact1 # Specify the name of the artifact
+          path: ./example1.txt # Specify the path to your generated file
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact1 # Specify the name of the artifact
+          path: ./downloads # Specify the path to your generated file
+
+      - name: Notify Notification On Faliure
+        uses: ravsamhq/notify-slack-action@2.3.0
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notify_when: "failure"
+          notification_title: "{emogi} Workflow *{workflow}* Faliure.Additional details:${{ steps['faliure'].outputs['failure-step'] }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

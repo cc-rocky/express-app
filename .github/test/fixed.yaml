@@ -1,0 +1,158 @@
+name: 6. APC Test End-to-End
+
+on: workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Notification On Start
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "Workflow - *{workflow}* is Started"
+          icon_success: ":large_orange_diamond:"
+          message_format: "{emoji} *{workflow}* is running in <{repo_url}|{repo}>"
+          mention_users: "U036401C6G4,U06SF453K6Z,U0361KQ8Z5Y,U044XHPAAG7,U04BL6NSZKQ"
+          footer: "Linked Repo <{repo_url}|{repo}> | <{workflow_url}|View Workflow>"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - uses: actions/checkout@v2
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: |
+            ${{ secrets.SSH_PRIVATE_KEY }}
+            ${{ secrets.SSH_PRIVATE_KEY_ALYF_PROV_PKG }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.16.9"
+          channel: "stable"
+
+      - name: Install web dependencies
+        run: flutter pub global activate webdev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Update Install dependencies
+        run: flutter pub upgrade
+
+      - name: Start WebDriver
+        run: |
+          chromedriver --port=4444 & sleep 5
+
+      - name: Login screen test start
+        run: echo "Login screen tests start"
+
+      - name: login_screen.login_positive & login_screen.login_negative
+        run: |
+          flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/full_auth_test.dart > reports/testing/full_auth_test.log -d web-server
+        continue-on-error: true
+
+      - name: login_screen.password_reset
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/reset_password_test.dart > reports/testing/reset_password_test.log -d web-server
+        continue-on-error: true
+
+      - name: Login screen test complete
+        run: echo "Login screen tests complete"
+
+      - name: Home screen test start
+        run: echo "Home screen tests start"
+
+      - name: home_screen.card_view.main & home_screen.graph_view.main & home.screen.table_view.main
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/different_list_screen_test.dart > reports/testing/different_list_screen_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.different_date_range
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/date_range_test.dart > reports/testing/date_range_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.male_filter
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/filter_test.dart > reports/testing/filter_test.log  -d web-server
+        continue-on-error: true
+
+      - name: home_screen.female_filter
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/female_filter_test.dart > reports/testing/female_filter_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.search
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/search_test.dart > reports/testing/search_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.ask_alyf
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/full_ask_alyf_test.dart > reports/testing/ask_alyf_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.all_cards_flip
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/all_cards_flip_test.dart > reports/testing/all_cards_flip_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.individual_card_flip
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/clinical_admin_view_test.dart > reports/testing/card_flip_test.log -d web-server
+        continue-on-error: true
+
+      - name: home_screen.member_addition
+        run: |
+          flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/member_test.dart > reports/testing/member_addition_test.log -d web-server
+        continue-on-error: true
+
+      - name: Home screen test complete
+        run: echo "Home screen tests complete"
+
+      - name: Member screen test start
+        run: echo "Member screen tests start"
+
+      - name: member_screen.heart & member_screen.mind & member_screen.body & member_screen.all_vitals & member_screen.compliances & member_screen.time_machine
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/member_details_nav_test.dart > reports/testing/member_details_nav_test.log -d web-server
+        continue-on-error: true
+
+      - name: member_screen.soap_creation
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/soap_test.dart> reports/testing/soap_test.log -d web-server
+        continue-on-error: true
+
+      - name: member_screen.ask_alyf
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/ask_alyf_member_details_test.dart> reports/testing/ask_alyf_member_details_test.log -d web-server
+        continue-on-error: true
+
+      - name: member_screen.different_date_range
+        run: flutter driver --driver=web_testing/test/integration_driver/integration_test_driver.dart --target=web_testing/member_screen_date_range_test.dart> reports/testing/member_screen_different_date_range_test.log -d web-server
+        continue-on-error: true
+
+      - name: Member screen test complete
+        run: echo "Member screen tests complete"
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports
+          path: reports/testing
+
+      - name: Notify Notification On Success
+        uses: ravsamhq/notify-slack-action@v2
+        if: always()
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "Workflow - *{workflow}* has {status_message}"
+          message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>"
+          footer: "Linked Repo <{repo_url}|{repo}> | <{workflow_url}|View Workflow>"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify Notification On Faliure
+        uses: ravsamhq/notify-slack-action@2.3.0
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notify_when: "failure"
+          notification_title: "Workflow - *{workflow}* is failing"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Stop WebDriver
+        run: pkill chromedriver

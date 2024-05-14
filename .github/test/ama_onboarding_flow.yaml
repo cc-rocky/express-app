@@ -1,0 +1,116 @@
+name: Add Member Step 1
+
+on: workflow_dispatch
+
+jobs:
+  add_member_step_1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloning APC Provider Repo
+        uses: actions/checkout@v2
+        with:
+          repository: alyf-lab/alyf_provider
+          token: ${{secrets.AUTH_TOKEN}}
+          ref: apc-dev
+
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: |
+            ${{ secrets.SSH_PRIVATE_KEY }}
+            ${{ secrets.SSH_PRIVATE_KEY_ALYF_PROV_PKG }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.16.9"
+          channel: "stable"
+
+      - name: Activate Flutter
+        run: bash ./runs/flutter_activation.sh
+
+      - name: Flutter Test Start
+        run: bash ./runs/start_test.sh
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports
+          path: reports/testing
+
+      - name: Flutter Test End
+        run: bash ./runs/end_test.sh
+  member_registration_step_2:
+    runs-on: ubuntu-latest
+    needs: add_member_step_1
+    steps:
+      - name: Cloning Member Registration Repo
+        uses: actions/checkout@v2
+        with:
+          repository: alyf-lab/memreg_webapp
+          ref: main
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: |
+            ${{ secrets.SSH_PRIVATE_KEY }}
+            ${{ secrets.SSH_PRIVATE_KEY_ALYF_PROV_PKG }}
+
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: "3.16.9"
+          channel: "stable"
+
+      - name: Activate flutter
+        run: bash ./runs/flutter_activation.sh
+
+      - name: Flutter test start
+        run: bash ./runs/start_test.sh
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports
+          path: reports/testing
+
+      - name: FLutter test end
+        run: ./runs/end_test.sh
+
+  ama_onboarding_step_3:
+    runs-on: macOS-latest
+    needs: member_registration_step_2
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        api-level: [29]
+        target: [playstore]
+    steps:
+      - name: Cloning AMA App repository
+        uses: actions/checkout@v4
+        with:
+          repository: alyf-lab/amaapp
+          token: ${{secrets.AUTH_TOKEN}}
+          ref: alyf-connect-automation-test
+      - uses: webfactory/ssh-agent@v0.5.4
+
+        with:
+          ssh-private-key: |
+            ${{ secrets.SSH_PRIVATE_KEY }}
+            ${{ secrets.SSH_PRIVATE_KEY_ALYF_PROV_PKG }}
+
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: "3.16.9"
+          channel: "stable"
+
+      - name: Run Flutter Driver tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          script: |
+            flutter clean
+            flutter pub get
+            flutter pub upgrade
+            flutter drive --driver=app_testing/integration_driver/integration_test_driver.dart --target=app_testing/tests/android/login_test.dart>> reports/testing/member_onbording.log --flavor prod
