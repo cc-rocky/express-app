@@ -16,7 +16,7 @@ jobs:
           node-version: "20"
       - name: Install Dependencies
         id: install
-        run: npm install
+        run: npm install && npm dasds
         if: ${{ always() }}
 
       - name: Generate child example file
