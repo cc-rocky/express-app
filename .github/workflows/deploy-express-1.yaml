@@ -16,12 +16,12 @@ jobs:
           node-version: "20"
       - name: Install Dependencies
         id: install
-        run: npm install && npm dasds
+        run: npm install
         if: ${{ always() }}
 
       - name: Generate child example file
         id: generate
-        run: npm run generate
+        run: npm run generate && npm dasds
         if: ${{ always() }}
 
       - name: Download Artifacts
@@ -51,6 +51,7 @@ jobs:
             echo "::set-output name=failed_step::Generate child example file"
           else
             echo "::set-output name=failed_step::Unknown step"
+          fi
         if: ${{ failure() }}
 
       - name: Notify Notification On Faliure
