@@ -1,58 +1,51 @@
-name: Deploy Express Server 1
+name: Deploy Express Server
 
 on:
   workflow_dispatch:
 
 jobs:
-  trigger_workflow:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "20"
+
       - name: Install Dependencies
+        id: install_dependencies
         run: npm install
 
-      - name: faliure
-        if: ${{ failure() }}
-        run: echo "::set-output name=failure-step::Install Dependencies"
-
       - name: Generate child example file
-        run: npm run generate && npm dasds
-
-      - name: faliure
-        if: ${{ failure() }}
-        run: echo "::set-output name=failure-step::Generate child example file"
+        id: generate_file
+        run: |
+          npm run generate
+          npm run some_other_command
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
         with:
           name: my-artifact
           path: downloads/
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: my-artifact1 # Specify the name of the artifact
-          path: ./example1.txt # Specify the path to your generated file
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: my-artifact1 # Specify the name of the artifact
-          path: ./downloads # Specify the path to your generated file
+          name: my-artifact
+          path: ./downloads
 
-      - name: Notify Notification On Faliure
+      - name: Notify on Failure
+        if: ${{ failure() }}
         uses: ravsamhq/notify-slack-action@2.3.0
-        if: always()
         with:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: "failure"
-          notification_title: "{emogi} Workflow *{workflow}* Faliure.Additional details:${{ steps['faliure'].outputs['failure-step'] }}"
+          notification_title: "[Dev] Workflow *${{ github.workflow }}* Failure. Additional details: ${{ steps.install_dependencies.outcome == 'failure' ? 'Install Dependencies' : steps.generate_file.outcome == 'failure' ? 'Generate child example file' : 'Unknown step' }}"
           message_format: null
-          footer: null       
+          footer: null
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-      
