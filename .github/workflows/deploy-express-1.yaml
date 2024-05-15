@@ -45,17 +45,17 @@ jobs:
 
       - name: Set failed step name
         id: set_failed_step_name
+        if: ${{ failure() }}
         run: |
           if [ "${{ steps.checkout.outcome }}" == "failure" ]; then
-            echo "::set-output name=failed_step::Checkout code"
+            echo "failed_step=Checkout code" >> $GITHUB_OUTPUT
           elif [ ${{ steps.install.outcome }} == "failure" ]; then
-            echo "::set-output name=failed_step::Install dependencies"
+            echo "failed_step=Install dependencies" >> $GITHUB_OUTPUT
           elif [ ${{steps.generate.outcome }} == "failure" ]; then
-            echo "::set-output name=failed_step::Generate child example file"
+            echo "failed_step=Generate child example file" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=failed_step::Unknown step"
+            echo "failed_step=Unknown step" >> $GITHUB_OUTPUT
           fi
-        if: ${{ failure() }}
 
       - name: Notify Notification On Faliure
         uses: ravsamhq/notify-slack-action@2.3.0
