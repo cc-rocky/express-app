@@ -7,9 +7,11 @@ jobs:
   trigger_workflow:
     runs-on: ubuntu-latest
     steps:
+      - name: Print Payload Data
+        run: |
+          echo "Received payload data: ${{ github.event.client_payload }}"
       - uses: actions/checkout@v3
         id: checkout
-        if: ${{ always() }}
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -18,7 +20,7 @@ jobs:
 
       - name: Install Dependencies
         id: install
-        run: npm install && npm dasds
+        run: npm install
 
       - name: Generate child example file
         id: generate
@@ -40,6 +42,7 @@ jobs:
         with:
           name: my-artifact1 # Specify the name of the artifact
           path: ./downloads # Specify the path to your generated file
+
       - name: Set failed step name
         id: set_failed_step_name
         run: |
