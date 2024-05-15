@@ -19,12 +19,10 @@ jobs:
       - name: Install Dependencies
         id: install
         run: npm install && npm dasds
-        if: ${{ always() }}
 
       - name: Generate child example file
         id: generate
         run: npm run generate && npm dasds
-        if: ${{ always() }}
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
