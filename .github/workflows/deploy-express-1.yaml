@@ -61,7 +61,7 @@ jobs:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: "failure"
-          notification_title: "[Dev] ✘ Workflow *{workflow}* Faliure. Additional details: Test failed - *${{ steps.set_failed_step_name.outputs.failed_step }}*. Link to detailed log here"
+          notification_title: "[Dev] ✘ Workflow *{workflow}* Faliure. Additional details: Test failed - *${{ steps.set_failed_step_name.outputs.failed_step }}*. Link to detailed log <{run_url}|here>"
           message_format: null
         #   footer: null
         env:
